@@ -68,46 +68,36 @@ class Vinted_Class
                 });
             const page = await browser.newPage();
             await page.setViewport({ width: 1200, height: 800 })
+            await page.setCacheEnabled(false);
+            await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
             await page.goto('https://www.vinted.fr/vetements?catalog[]=5&order=newest_first');
                 
             await page.once('load', () => console.log('Page loaded!'));
             await page.screenshot({path: 'C:\\Users\\axelr\\Downloads\\exemple.png'});
-            await page.waitForTimeout(4000);
-            console.log("waited 4000ms");
-            
+            await page.waitForTimeout(1000);            
             await this.randomlyMoveMouse(page.mouse);
-            console.log("randomly move mouse");
             var button = JSON.parse(await this.getElement(page,"#onetrust-accept-btn-handler"));
-            console.log("get accept button");
             if(typeof(button) == "undefined")
             {
                 await browser.close();
             }     
             
             await this.clickOnElement(page.mouse, button);
-
-
-
-            console.log("clicked");
-           await page.screenshot({path: 'C:\\Users\\axelr\\Downloads\\exemple.png'});
             var list = await this.getElements(page,".feed-grid__item");
             list.forEach(element => {
                 var object = JSON.parse(element);
                 console.log(object.innerText);
             });
     
-            await page.waitForTimeout(4000);
-            
-           await browser.close();
+            await page.waitForTimeout(4000);            
+            await browser.close();
          })()
     }
 
 }
 
-var object = new Vinted_Class();
-
  
-//module.exports = Vinted_Class;
+module.exports = Vinted_Class;
  
 
 
