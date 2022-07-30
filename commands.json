@@ -1,0 +1,98 @@
+{
+    "PRICE_COMMAND" :
+            {
+                "name" : "set-price",
+                "description" : "Sauvegarde le prix des produit que vous souhaitez avoir.",
+                "options" :
+                [
+                    {
+                        "name" : "min-price",
+                        "description":"Sélectionne le prix minimal",
+                        "type" : 4,
+                        "required" : true
+                    },
+                    {
+                        "name" : "max-price",
+                        "description":"Sélectionne le prix maximum",
+                        "type" : 4,
+                        "required" : true
+                    }
+                ]
+                
+            },
+    "SIZE_COMMAND":                
+            {
+                "name" : "set-size",
+                "description" : "Sauvegarde la taille des produit que vous souhaitez avoir.",
+                "options":[
+                    {
+                        "name":"size",
+                        "description": "Sélectionner la taille",
+                        "type" : 3,
+                        "required" : true,
+                        "choices" : 
+                            [
+                                {
+                                    "name": "S taille",
+                                    "value": "S"
+                                },
+                                {
+                                    "name": "M taille",
+                                    "value": "M"
+                                },
+                                {
+                                    "name": "L taille",
+                                    "value": "L"
+
+                                },
+                                {
+                                    "name": "XL taille",
+                                    "value": "XL"
+                                },
+                                {
+                                    "name": "ALL taille",
+                                    "value": "ALL"
+                                }
+                            ]
+                            
+                    }
+                
+                ]
+                
+            },
+            "STATE_COMMAND":    
+            {
+                "name" : "set-state",
+                "description" : "Sauvegarde l'état des produit que vous souhaitez avoir.",
+                "options":[
+                    {
+                        "name":"state",
+                        "description": "Sélectionner l'état",
+                        "type" : 3,
+                        "required" : true,
+                        "choices" : 
+                            [
+                                {
+                                    "name": "neuf",
+                                    "value": "neuf"
+                                },
+                                {
+                                    "name": "très bon état",
+                                    "value": "très bon état"
+                                },
+                                {
+                                    "name": "bon état",
+                                    "value": "bon état"
+
+                                },
+                                {
+                                    "name": "ALL",
+                                    "value": "ALL"
+                                }
+                            ]
+                            
+                    }
+                
+                ]
+            }
+}
