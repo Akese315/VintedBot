@@ -50,8 +50,13 @@
                                     "value": "XL"
                                 },
                                 {
-                                    "name": "ALL taille",
-                                    "value": "ALL"
+                                    "name": "toutes tailles",
+                                    "value": "tout"
+                                }
+                                ,
+                                {
+                                    "name" : "aucun",
+                                    "value": "aucun"
                                 }
                             ]
                             
@@ -86,8 +91,12 @@
 
                                 },
                                 {
-                                    "name": "ALL",
-                                    "value": "ALL"
+                                    "name": "tout état",
+                                    "value": "tout"
+                                },
+                                {
+                                    "name" : "aucun",
+                                    "value": "aucun"
                                 }
                             ]
                             

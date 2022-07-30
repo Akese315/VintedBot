@@ -10,6 +10,7 @@ class Robot
     GENERAL_CHANNEL;
     PRODUCT_CHANNEL;
     client;
+    vintedObj;
     rest;
     static_value;
 
@@ -28,18 +29,18 @@ class Robot
     constructor(static_value, commandList)
     {
         this.static_value = static_value;    
+        this.vintedObj = new Vinted_Class();
         this.client = new Client({intents : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]}); 
         this.rest = new REST({ version: '10' }).setToken(this.static_value.TOKEN);
         this.commands.push(commandList.PRICE_COMMAND);
         this.commands.push(commandList.SIZE_COMMAND);
-        this.commands.push(commandList.STATE_COMMAND);
-        this.__init__();       
+        this.commands.push(commandList.STATE_COMMAND);      
     }
     
 
 
     __init__()
-    {   
+    { 
         this.client.login(this.static_value.TOKEN,);
         
         this.client.once("ready", ()=>
@@ -49,8 +50,7 @@ class Robot
             this.PRODUCT_CHANNEL = this.client.channels.cache.get(this.static_value.product_channel_id);
             this.GENERAL_CHANNEL = this.client.channels.cache.get(this.static_value.general_channel_id); 
             console.log("Bot connecté");
-            this.createAllCommands();
-            this.createListeners();
+            this.vintedObj.__init__().then(()=>{this.createAllCommands(); this.createListeners();});            
         });      
            
                               
@@ -64,7 +64,7 @@ class Robot
         this.rest.put(
             Routes.applicationCommands(this.static_value.CLIENT_ID),
             { body: this.commands },
-        );
+        );        
     }
 
     createListeners()
@@ -75,33 +75,43 @@ class Robot
                 switch(interaction.commandName)
                 {
                     case "set-price":
-                        interaction.reply("Prix appliqué minimum de : "
-                        +interaction.options.get('min-price').value+ "€ et maximum à : "
-                        +interaction.options.get('max-price').value+"€.");
+
+                        var price_from = interaction.options.get('min-price').value;
+                        var price_to = interaction.options.get('max-price').value;
+
+                        interaction.reply("Prix appliqué minimum de : "+price_from + "€ et maximum à : "+price_to+ "€.");
+                        this.vintedObj.setPrice(price_from,price_to)
                         break;
                     case 'set-size':
-                        interaction.reply("Taille sélectionnée "+interaction.options.get('size').value+".");
+                        var value = interaction.options.get('size').value;
+                        interaction.reply("Taille sélectionnée "+value+".");
+                        this.vintedObj.setSize(value)
                         break;
                     case 'set-state':
-                        interaction.reply("Etat sélectionné : "+interaction.options.get('state').value+".");
+                        var value = interaction.options.get('state').value;
+                        interaction.reply("Etat sélectionné : "+value+".");
+                        this.vintedObj.setState(value)
                         break;
                 }
             }
             
         });
     }
+
+    getProducts()
+    {
+        var list =  this.vintedObj.getCatalogue();
+        console.log(JSON.parse(list))
+    }
     
 
 }
 
 var robot = new Robot(constants,commandsList);
-//var vintedObj = new Vinted_Class();
-setTimeout(
-    ()=>
-    {
-        //vintedObj.randomlyMoveMouse();
-        var online = true;
-        //vintedObj.closeSession();
-    },
-    10000)
+robot.__init__(); 
+
+setInterval(()=>
+{
+    robot.getProducts();
+},20000);
 
