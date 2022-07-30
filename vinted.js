@@ -3,19 +3,6 @@ const puppeteer = require('puppeteer');
 class Vinted_Class
 {
     page;
-    browser;
-
-    categorie_vetement_homme = "vetements?catalog[]=2050";
-    size_S = "size_id[]=207";    
-    size_M = "size_id[]=208";
-    size_L = "size_id[]=209";
-    size_XL = "size_id[]=210";
-    state_new = "status[]=1&status[]=6";
-    state_really_good = "status[]=2";
-    state_good = "status[]=3";
-    price_from = "price_from=";
-    price_to = "price_to="
-    money = "currency=EUR"
 
     constructor()
     {
@@ -73,21 +60,21 @@ class Vinted_Class
 
     closeSession()
     {
-        this.browser.close();
+        await browser.close();
     }
 
     __init__()
     {
         (async () => {
             
-            this.browser = await puppeteer.launch(
+            const browser = await puppeteer.launch(
                 {
                     headless : true,
                     args: [
                     '--window-size=1200,800',]
                 
                 });
-            this.page= await this.browser.newPage();
+            this.page= await browser.newPage();
             await this.page.setViewport({ width: 1200, height: 800 })
             await this.page.setCacheEnabled(false);
             await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
@@ -100,7 +87,7 @@ class Vinted_Class
             var button = JSON.parse(await this.getElement("#onetrust-accept-btn-handler"));
             if(typeof(button) == "undefined")
             {
-                await this.browser.close();
+                await browser.close();
             }     
             
             await this.clickOnElement(button);
@@ -109,7 +96,7 @@ class Vinted_Class
                 var object = JSON.parse(element);
                 console.log(object.innerText);
             });
-        
+            
            
          })()
     }
