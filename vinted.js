@@ -179,7 +179,7 @@ class Vinted_Class
             this.IsCookieSet = await true;
             await this.clickOnElement(JSON.parse(button));
         }       
-       
+        
         await this.page.$$eval(".feed-grid__item",(result)=>
         {
             var list = []
@@ -195,16 +195,7 @@ class Vinted_Class
                 list.push(object);
             });
             console.log(list);
-           /*var object = JSON.stringify
-            ({
-                offsetLeft: result.getBoundingClientRect().left,
-                offsetTop: result.getBoundingClientRect().top,
-                offsetHeight: result.offsetHeight,
-                offsetWidth: result.offsetWidth,
-                innerText: result.innerText
-            });*/
-        })
-       
+        })       
     }
 
     async __init__()

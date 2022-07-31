@@ -80,12 +80,12 @@ class Robot
                         var price_to = interaction.options.get('max-price').value;
 
                         interaction.reply("Prix appliqué minimum de : "+price_from + "€ et maximum à : "+price_to+ "€.");
-                        this.vintedObj.setPrice(price_from,price_to)
+                        // this.vintedObj.setPrice(price_from,price_to)
                         break;
                     case 'set-size':
                         var value = interaction.options.get('size').value;
                         interaction.reply("Taille sélectionnée "+value+".");
-                        this.vintedObj.setSize(value)
+                        //this.vintedObj.setSize(value)
                         break;
                     case 'set-state':
                         var value = interaction.options.get('state').value;
@@ -112,6 +112,6 @@ robot.__init__();
 
 setInterval(()=>
 {
-    robot.getProducts();
+    //robot.getProducts();
 },20000);
 
