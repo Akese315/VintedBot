@@ -112,6 +112,6 @@ robot.__init__();
 
 setInterval(()=>
 {
-    robot.getProducts();
+   // robot.getProducts();
 },20000);
 

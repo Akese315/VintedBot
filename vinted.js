@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 
+
 class Vinted_Class
 {
     page;
@@ -43,26 +44,24 @@ class Vinted_Class
                 });
     }
 
-    getElements(element)
+    async getElements(element)
     {
-        return this.page.$$eval(element, results =>
-            {          
-                var list = [];
-                /*
-                results.forEach(element => {
-                    var object = JSON.stringify
-                    ({
-                        offsetLeft: element.getBoundingClientRect().left,
-                        offsetTop: element.getBoundingClientRect().top,
-                        offsetHeight: element.offsetHeight,
-                        offsetWidth: element.offsetWidth,
-                        innerText: element.innerText
-                    });
-                    console.log(object);
-                    list.push(object);
-                });*/
-                return list;
+        return await this.page.$$eval(element,(result)=>
+        {
+            var list = []
+            result.forEach(element => {
+                var object = JSON.stringify
+                ({
+                    offsetLeft: element.getBoundingClientRect().left,
+                    offsetTop: element.getBoundingClientRect().top,
+                    offsetHeight: element.offsetHeight,
+                    offsetWidth: element.offsetWidth,
+                    innerText: element.innerText
+                });
+                list.push(JSON.parse(object));
             });
+            return list;           
+        })
     }
 
     clickOnElement(element)
@@ -179,31 +178,10 @@ class Vinted_Class
             this.IsCookieSet = await true;
             await this.clickOnElement(JSON.parse(button));
         }       
-       
-        await this.page.$$eval(".feed-grid__item",(result)=>
-        {
-            var list = []
-            result.forEach(element => {
-                var object = JSON.stringify
-                ({
-                    offsetLeft: element.getBoundingClientRect().left,
-                    offsetTop: element.getBoundingClientRect().top,
-                    offsetHeight: element.offsetHeight,
-                    offsetWidth: element.offsetWidth,
-                    innerText: element.innerText
-                });
-                list.push(object);
-            });
-            console.log(list);
-           /*var object = JSON.stringify
-            ({
-                offsetLeft: result.getBoundingClientRect().left,
-                offsetTop: result.getBoundingClientRect().top,
-                offsetHeight: result.offsetHeight,
-                offsetWidth: result.offsetWidth,
-                innerText: result.innerText
-            });*/
-        })
+        var value;
+        value = await this.getElements(".feed-grid__item");
+        console.log(value)
+    
        
     }
 
