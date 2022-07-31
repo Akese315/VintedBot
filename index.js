@@ -100,7 +100,7 @@ class Robot
 
     getProducts()
     {
-        var list =  this.vintedObj.getCatalogue();
+        var list = this.vintedObj.getCatalogue();
         console.log(JSON.parse(list))
     }
     

@@ -163,7 +163,6 @@ class Vinted_Class
             adresse += await "&" +this.money;
             adresse += await "&"+this.price;
         }
-        console.log(this);
         await console.log(adresse)
         await this.page.goto(adresse, {waitUntil: 'load'});
         await this.page.waitForTimeout(2000);  
@@ -180,6 +179,32 @@ class Vinted_Class
             this.IsCookieSet = await true;
             await this.clickOnElement(JSON.parse(button));
         }       
+       
+        await this.page.$$eval(".feed-grid__item",(result)=>
+        {
+            var list = []
+            result.forEach(element => {
+                var object = JSON.stringify
+                ({
+                    offsetLeft: element.getBoundingClientRect().left,
+                    offsetTop: element.getBoundingClientRect().top,
+                    offsetHeight: element.offsetHeight,
+                    offsetWidth: element.offsetWidth,
+                    innerText: element.innerText
+                });
+                list.push(object);
+            });
+            console.log(list);
+           /*var object = JSON.stringify
+            ({
+                offsetLeft: result.getBoundingClientRect().left,
+                offsetTop: result.getBoundingClientRect().top,
+                offsetHeight: result.offsetHeight,
+                offsetWidth: result.offsetWidth,
+                innerText: result.innerText
+            });*/
+        })
+       
     }
 
     async __init__()
