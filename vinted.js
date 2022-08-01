@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 
+
 class Vinted_Class
 {
     page;
@@ -43,26 +44,24 @@ class Vinted_Class
                 });
     }
 
-    getElements(element)
+    async getElements(element)
     {
-        return this.page.$$eval(element, results =>
-            {          
-                var list = [];
-                /*
-                results.forEach(element => {
-                    var object = JSON.stringify
-                    ({
-                        offsetLeft: element.getBoundingClientRect().left,
-                        offsetTop: element.getBoundingClientRect().top,
-                        offsetHeight: element.offsetHeight,
-                        offsetWidth: element.offsetWidth,
-                        innerText: element.innerText
-                    });
-                    console.log(object);
-                    list.push(object);
-                });*/
-                return list;
+        return await this.page.$$eval(element,(result)=>
+        {
+            var list = []
+            result.forEach(element => {
+                var object = JSON.stringify
+                ({
+                    offsetLeft: element.getBoundingClientRect().left,
+                    offsetTop: element.getBoundingClientRect().top,
+                    offsetHeight: element.offsetHeight,
+                    offsetWidth: element.offsetWidth,
+                    innerText: element.innerText
+                });
+                list.push(JSON.parse(object));
             });
+            return list;           
+        })
     }
 
     clickOnElement(element)
@@ -137,12 +136,31 @@ class Vinted_Class
 
     async getCatalogue()
     {
-        var list = await this.getElements(".feed-grid__item");
-        await list.forEach(element => {
-            var object = JSON.parse(element);
-        });
-        return list;
-    }
+        var FinalProductList = await this.page.evaluate(()=>
+        {   
+            var productList = [];
+            var imageList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_image']");
+            var priceList =  document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_title']");
+            var brandList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_details']");
+            var sizeList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_subtitle']");
+
+            for(var i = 0; i < imageList.length; i++)
+            {
+                var object = JSON.stringify(
+                    {
+                        brand: brandList[i].innerText,
+                        url: imageList[i].lastChild.href,
+                        size: sizeList[i].innerText,
+                        image: imageList[i].firstChild.firstChild.src,
+                        price: priceList[i].innerText,
+                    }
+                );
+                productList.push(JSON.parse(object));
+            }
+            return productList;
+        })
+        return FinalProductList;
+     }
 
     async refresh()
     {
@@ -164,10 +182,9 @@ class Vinted_Class
             adresse += await "&"+this.price;
         }
         await console.log(adresse)
-        await this.page.goto(adresse, {waitUntil: 'load'});
-        await this.page.waitForTimeout(2000);  
-        await this.page.screenshot({path: 'exemple.png'});
+        await this.page.goto(adresse);
         await console.log("page load")
+        await this.page.screenshot({path: 'exemple.png'});
         if(!this.IsCookieSet)
         {
             var button = await this.getElement("#onetrust-accept-btn-handler");
@@ -179,23 +196,8 @@ class Vinted_Class
             this.IsCookieSet = await true;
             await this.clickOnElement(JSON.parse(button));
         }       
-        
-        await this.page.$$eval(".feed-grid__item",(result)=>
-        {
-            var list = []
-            result.forEach(element => {
-                var object = JSON.stringify
-                ({
-                    offsetLeft: element.getBoundingClientRect().left,
-                    offsetTop: element.getBoundingClientRect().top,
-                    offsetHeight: element.offsetHeight,
-                    offsetWidth: element.offsetWidth,
-                    innerText: element.innerText
-                });
-                list.push(object);
-            });
-            console.log(list);
-        })       
+    
+       
     }
 
     async __init__()

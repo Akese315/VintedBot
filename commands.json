@@ -103,5 +103,32 @@
                     }
                 
                 ]
+            },
+
+            "DATABASE_COMMAND":
+            {
+                "name" : "Database",
+                "description" : "Sauvegarde la taille des produit que vous souhaitez avoir.",
+                "options":[
+                    {
+                        "name":"actions",
+                        "description": "sélectionner une action à réaliser sur la base de donnée",
+                        "type" : 3,
+                        "required" : true,
+                        "choices" : 
+                            [
+                                {
+                                    "name": "delete",
+                                    "value": "S"
+                                },
+                                {
+                                    "name": "get-purchase",
+                                    "value": "afficher les achats"
+                                }
+                            ]
+                            
+                    }
+                
+                ]
             }
 }
