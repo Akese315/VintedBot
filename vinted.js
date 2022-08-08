@@ -166,7 +166,7 @@ class Vinted_Class
             });
             if(typeof(button) == "undefined")
             {   
-                console.log("Session closed")
+                console.log("button undefined !")
                 this.IsCookieSet = await true;
                 //this.closeSession();
                 return;

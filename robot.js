@@ -1,9 +1,8 @@
 const {Client, GatewayIntentBits, Routes, EmbedBuilder} = require("discord.js");
 const { REST } = require('@discordjs/rest');
-var Vinted_Class = require("./vinted")
+var Vinted_Class = require("./vinted");
 var Database = require("./database");
-var constants = require("./config.json"); 
-var commandsList = require("./commands.json");
+
 
 
 class Robot
@@ -14,10 +13,11 @@ class Robot
     vintedObj;
     db;
     rest;
-    static_value;
+    commandsID;
     intervalID;
     IsRunning = false;
-
+    botToken;
+    clientID;
     //commands
 
     commands = 
@@ -30,13 +30,15 @@ class Robot
     
     
 
-    constructor(static_value, commandList)
+    constructor(commandsID, commandList, botToken, clientID)
     {
-        this.static_value = static_value;    
+        this.clientID = clientID;
+        this.botToken = botToken;
+        this.commandsID = commandsID;    
         this.vintedObj = new Vinted_Class();
         this.db = new Database();
         this.client = new Client({intents : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]}); 
-        this.rest = new REST({ version: '10' }).setToken(this.static_value.TOKEN);
+        this.rest = new REST({ version: '10' }).setToken(this.botToken);
         this.commands.push(commandList.PRICE_COMMAND);
         this.commands.push(commandList.SIZE_COMMAND);
         this.commands.push(commandList.STATE_COMMAND);   
@@ -50,15 +52,15 @@ class Robot
     { 
         await this.createDatabase();
         await console.log("database online");
-        this.client.login(this.static_value.TOKEN);
+        this.client.login(this.botToken);
             
         this.client.on("ready", async()=>
             {
                 
                 await this.client.user.setStatus("online");
                 await this.client.user.setActivity("En train de se faire coder.")      
-                this.PRODUCT_CHANNEL = await this.client.channels.cache.get(this.static_value.product_channel_id);
-                this.GENERAL_CHANNEL = await this.client.channels.cache.get(this.static_value.general_channel_id); 
+                this.PRODUCT_CHANNEL = await this.client.channels.cache.get(this.commandsID.product_channel_id);
+                this.GENERAL_CHANNEL = await this.client.channels.cache.get(this.commandsID.general_channel_id); 
                 await console.log("Bot connecté");
                 await this.vintedObj.__init__();   
                 await console.log("Vinted scrapper connecté");                           
@@ -76,7 +78,7 @@ class Robot
     createAllCommands()
     {
         this.rest.put(
-            Routes.applicationCommands(this.static_value.CLIENT_ID),
+            Routes.applicationCommands(this.clientID),
             { body: this.commands },
         );        
     }
@@ -223,19 +225,8 @@ class Robot
 
 }
 
-var robot = new Robot(constants,commandsList);
-robot.__init__(()=>
-{
-    robot.intervalID = setInterval(()=>
-    {
-        robot.getProducts();
-        var today= new Date().toLocaleString('fr-FR', { timeZone: 'UTC' });
-        console.log("refresh at " + today)
-    },20000);
-    //robot.db.sequelize.close();
-    //robot.client.destroy()
 
-});
+module.exports = Robot;
 
 
 
