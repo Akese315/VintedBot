@@ -290,7 +290,7 @@ class Vinted_Class
         }) 
     }
 
-}
+} 
 
 module.exports = Vinted_Class;
  
