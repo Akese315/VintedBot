@@ -262,7 +262,7 @@ class Vinted_Class
                 {
                             headless : true,
                             args: [
-                            '--window-size=1200,800',]
+                            '--window-size=1200,800','--no-sandbox','--disable-setuid-sandbox']
                         
                 });
             object.page= await object.browser.newPage();
