@@ -1,9 +1,9 @@
 const {Client, GatewayIntentBits, Routes, EmbedBuilder} = require("discord.js");
-const Sequelize = require('sequelize');
 const { REST } = require('@discordjs/rest');
 var Vinted_Class = require("./vinted")
+var Database = require("./database");
 var constants = require("./config.json"); 
-var commandsList = require("./commands.json")
+var commandsList = require("./commands.json");
 
 
 class Robot
@@ -12,8 +12,11 @@ class Robot
     PRODUCT_CHANNEL;
     client;
     vintedObj;
+    db;
     rest;
     static_value;
+    intervalID;
+    IsRunning = false;
 
     //commands
 
@@ -31,33 +34,40 @@ class Robot
     {
         this.static_value = static_value;    
         this.vintedObj = new Vinted_Class();
+        this.db = new Database();
         this.client = new Client({intents : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]}); 
         this.rest = new REST({ version: '10' }).setToken(this.static_value.TOKEN);
         this.commands.push(commandList.PRICE_COMMAND);
         this.commands.push(commandList.SIZE_COMMAND);
         this.commands.push(commandList.STATE_COMMAND);   
         this.commands.push(commandList.DATABASE_COMMAND); 
+        this.commands.push(commandList.BRAND_COMMAND);
     }
     
 
 
-    __init__(callback)
+    async __init__(callback)
     { 
-        this.client.login(this.static_value.TOKEN,);
-        
-        this.client.once("ready", ()=>
-        {
-            this.client.user.setStatus("online");
-            this.client.user.setActivity("En train de se faire coder.")      
-            this.PRODUCT_CHANNEL = this.client.channels.cache.get(this.static_value.product_channel_id);
-            this.GENERAL_CHANNEL = this.client.channels.cache.get(this.static_value.general_channel_id); 
-            console.log("Bot connecté");
-            this.createDatabase();
-            this.vintedObj.__init__().then(()=>{this.createAllCommands(); this.createListeners(); callback();}); 
-                      
-        });      
-           
-                              
+        await this.createDatabase();
+        await console.log("database online");
+        this.client.login(this.static_value.TOKEN);
+            
+        this.client.on("ready", async()=>
+            {
+                
+                await this.client.user.setStatus("online");
+                await this.client.user.setActivity("En train de se faire coder.")      
+                this.PRODUCT_CHANNEL = await this.client.channels.cache.get(this.static_value.product_channel_id);
+                this.GENERAL_CHANNEL = await this.client.channels.cache.get(this.static_value.general_channel_id); 
+                await console.log("Bot connecté");
+                await this.vintedObj.__init__();   
+                await console.log("Vinted scrapper connecté");                           
+                await this.createAllCommands();
+                await console.log("Commands created");
+                await this.createListeners();
+                await console.log("Command listeners created");
+                await callback();
+            });           
     }
     async sendMessage(message, channel)
     {
@@ -72,20 +82,21 @@ class Robot
     }
 
     createDatabase()
-    {
-        const sequelize = new Sequelize('database', 'user', 'password', {
-            host: 'localhost',
-            dialect: 'sqlite',
-            logging: false,
-            // SQLite only
-            storage: 'database.sqlite',
-        });
-        var urlTable = sequelize.define('ProductTable',
-       
-           this.static_value.productTable
-        );
+    {        
+        return this.db.__init__();
+    }
 
-        sequelize.authenticate().then(()=> {console.log("database ready")})
+    async sendPurchasedProduct(list)
+    {
+        if(list.length == 0)
+        {
+            this.GENERAL_CHANNEL.send("pas d'achats enregistré.")
+            return;
+        }
+        for(var i = 0; i<list.length; i++)
+        {
+            this.GENERAL_CHANNEL.send("commande :")
+        }
     }
 
     async sendProduct(product)
@@ -115,8 +126,10 @@ class Robot
         }
         
        
-        await this.PRODUCT_CHANNEL.send({ embeds: [productMessage] });
+        return this.PRODUCT_CHANNEL.send({ embeds: [productMessage] });
     }
+
+
 
     createListeners()
     {
@@ -143,14 +156,22 @@ class Robot
                         interaction.reply("Etat sélectionné : "+value+".");
                         this.vintedObj.setState(value)
                         break;
-                    case 'Database':
+                    case 'search-brand':
+                        var value = interaction.options.get('brand').value;
+                        interaction.reply("Marque sélectionné : "+value+".");
+                        this.vintedObj.searchBrand(value);
+                        break;
+                    case 'database':
                         var value = interaction.options.get('actions').value;
-                        interaction.reply("Etat sélectionné : "+value+".");
+                        interaction.reply("base de donnée : "+value+".");
                         switch(value)
                         {
                             case "supprimer":
+                                this.db.deleteAllProduct();
+                                this.GENERAL_CHANNEL.send("base de donné supprimé");
                                 break;
                             case "afficher les achats":
+                                this.sendPurchasedProduct(this.db.findPurchased());
                                 break;
                         }
                         break;
@@ -160,34 +181,61 @@ class Robot
         });
     }
 
-    getProducts()
+    async getProducts()
     {
-        var promise = this.vintedObj.getCatalogue();
-        promise.then((list)=>
-        {   
-            console.log(list.length)
-            if(list.length === 0)
+        if(this.IsRunning)
+        {
+            console.log("is running...")
+            return;
+        }
+        this.IsRunning = await true;
+        var now = Date.now();
+        var list = await this.vintedObj.getCatalogue();
+        var delta = (Date.now() -now)/1000;
+        console.log("temps écoulé : " + delta + "s");
+        await console.log("collecté : "+list.length)
+        if(list.length === 0)
+        {
+            this.IsRunning = await false;
+            return;
+        }
+        var productNumber = await 0;
+        for(var i = list.length-1; i>=0; i--)
+        {
+            var value = await this.db.urlExists(list[i].url)
+            if(value !==null)
             {
-                return;
+                continue;
             }
-            list.forEach(element => {
-                this.sendProduct(element);
-            });
+            await this.sendProduct(list[i]).catch(()=>
+            {
+                console.log("error when sent")
+                return;
+            })
             
-        })
-    }
-    
+            await this.db.addProduct(list[i].url);
+            await productNumber++;            
+
+        }
+        await console.log("Envoyé : "+productNumber);
+        this.IsRunning = await false;
+    }    
 
 }
 
 var robot = new Robot(constants,commandsList);
 robot.__init__(()=>
 {
-    setTimeout(()=>
+    robot.intervalID = setInterval(()=>
     {
         robot.getProducts();
-    },10000);
-}); 
+        var today= new Date().toLocaleString('fr-FR', { timeZone: 'UTC' });
+        console.log("refresh at " + today)
+    },20000);
+    //robot.db.sequelize.close();
+    //robot.client.destroy()
+
+});
 
 
 

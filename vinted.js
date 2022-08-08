@@ -5,7 +5,11 @@ class Vinted_Class
 {
     page;
     browser;
+    adresse = "";
+    oldAdresse;
     IsCookieSet = false;
+    isOpen = false;
+    Cookies;
 
     categorie_vetement_homme = "vetements?catalog[]=2050";
     size_S = "size_id[]=207";    
@@ -15,14 +19,16 @@ class Vinted_Class
     state_new = "status[]=1&status[]=6";
     state_really_good = "status[]=2";
     state_good = "status[]=3";
+    newest_first = "order=newest_first"
     price_from = "price_from=";
-    price_to = "price_to="
-    money = "currency=EUR"
+    price_to = "price_to=";
+    money = "currency=EUR";
+    searchText = "search_text=";
 
     size ="";
     state ="";
     price = "";
-    
+    search ="";
 
     randomlyMoveMouse()
     {
@@ -64,12 +70,12 @@ class Vinted_Class
         })
     }
 
-    clickOnElement(element)
+    async clickOnElement(element)
     {
         var buttonX = element.offsetLeft + element.offsetWidth/2;
         var buttonY = element.offsetTop + element.offsetHeight/2;
-        this.page.mouse.move(buttonX,buttonY);
-        this.page.mouse.click(buttonX,buttonY, { button: 'left' })
+        await this.page.mouse.move(buttonX,buttonY);
+        return this.page.mouse.click(buttonX,buttonY, { button: 'left' })
     }
 
     closeSession()
@@ -101,7 +107,13 @@ class Vinted_Class
                 break;
         }
         console.log(this.size)
-        this.refresh();
+        this.setNewUrl();
+    }
+
+    searchBrand(brand)
+    {
+        this.search = this.searchText + brand;
+        this.setNewUrl();
     }
 
     setState(tempState)
@@ -125,79 +137,120 @@ class Vinted_Class
                 break;
         }
         console.log(this.state)
-        this.refresh();
+        this.setNewUrl();
     }
 
     setPrice(from, to)
     {
         this.price = this.price_from +from + "&"+ this.price_to + to;
-        this.refresh();
+        this.setNewUrl();
+    }
+
+    async refresh()
+    {
+        if(this.adresse == this.oldAdresse)
+        {
+            await this.page.reload();
+        }else
+        {
+            await this.page.goto(this.adresse, {waitUntil:"load"});
+            this.oldAdresse = this.adresse;
+        }
+        //await this.page.screenshot({path: 'exemple.png'});
+        if(!this.IsCookieSet)
+        {
+            var button = await this.getElement("#onetrust-accept-btn-handler").catch(()=>
+            {
+                console.log("error")
+                return;
+            });
+            if(typeof(button) == "undefined")
+            {   
+                console.log("Session closed")
+                this.IsCookieSet = await true;
+                //this.closeSession();
+                return;
+            }else
+            {
+                this.IsCookieSet = await true;
+                return this.clickOnElement(JSON.parse(button));
+            }            
+            //this.Cookies = await JSON.stringify(await this.page.cookies(), null, 2);
+           
+        }else
+        {
+           //this.page.setCookie(JSON.parse(this.Cookies));
+        }
     }
 
     async getCatalogue()
-    {
+    {   
+        if(this.adresse === "")
+        {
+            var list = []
+            return list;
+        }
+        await this.refresh();
         var FinalProductList = await this.page.evaluate(()=>
         {   
             var productList = [];
             var imageList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_image']");
-            var priceList =  document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_title']");
+            var priceList =  document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_title-content']");
             var brandList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_details']");
             var sizeList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_subtitle']");
 
             for(var i = 0; i < imageList.length; i++)
-            {
-                var object = JSON.stringify(
-                    {
-                        brand: brandList[i].innerText,
-                        url: imageList[i].lastChild.href,
-                        size: sizeList[i].innerText,
-                        image: imageList[i].firstChild.firstChild.src,
-                        price: priceList[i].innerText,
-                    }
-                );
-                productList.push(JSON.parse(object));
+            {   
+                try{
+                    var object = JSON.stringify(
+                        {
+                            brand: brandList[i].innerText,
+                            url: imageList[i].lastChild.href,
+                            size: sizeList[i].innerText,
+                            image: imageList[i].firstChild.firstChild.src,
+                            price: priceList[i].innerText,
+                        }
+                    );
+                    productList.push(JSON.parse(object));
+                }catch(error)
+                {
+                    console.log(error)  
+                }
+                
             }
             return productList;
         })
         return FinalProductList;
      }
 
-    async refresh()
+
+    async setNewUrl()
     {
-        var adresse = await "https://www.vinted.fr/";
-        adresse += await this.categorie_vetement_homme;
+        var tempAdresse = await "https://www.vinted.fr/";
+        tempAdresse += await this.categorie_vetement_homme;
         if(this.size !== "")
         {
-            adresse += await"&"+this.size;       
+            tempAdresse += await"&"+this.size;       
         }
        
         if(this.state !== "")
         {
-            adresse += await"&"+this.state;       
+            tempAdresse += await"&"+this.state;       
         }
         
         if(this.price !== "")
         {
-            adresse += await "&" +this.money;
-            adresse += await "&"+this.price;
+            tempAdresse += await "&" +this.money;
+            tempAdresse += await "&"+this.price;
         }
-        await console.log(adresse)
-        await this.page.goto(adresse);
-        await console.log("page load")
-        await this.page.screenshot({path: 'exemple.png'});
-        if(!this.IsCookieSet)
+        if(this.search !=="")
         {
-            var button = await this.getElement("#onetrust-accept-btn-handler");
-            if(typeof(button) == "undefined")
-            {   
-                this.closeSession();
-                return;
-            } 
-            this.IsCookieSet = await true;
-            await this.clickOnElement(JSON.parse(button));
-        }       
-    
-       
+            tempAdresse += await "&"+this.search;
+        }
+        tempAdresse += await "&"+ this.newest_first;
+
+        await console.log(tempAdresse)
+        this.adresse = tempAdresse;
     }
 
     async __init__()
@@ -214,17 +267,25 @@ class Vinted_Class
                 });
             object.page= await object.browser.newPage();
             object.page.setViewport({ width: 1200, height: 800 })
-            object.page.setCacheEnabled(false);
+            object.page.setCacheEnabled(true);
             object.page.setDefaultNavigationTimeout(0); 
-            object.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")        
-            console.log("Vinted scrapper connecté")  
-                    
+            object.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")                            
             if(typeof(object.browser) !== "undefined" && typeof(object.page) !=="undefined")
             {
                 resolve("ok");
             }else{
                 reject("error")
             }
+            await object.page.setRequestInterception(true);
+            await object.page.on("request", request => {
+                if (/google|cloudflare/.test(request.url())) {
+                    console.log("aborted : "+ request.url())
+                    request.abort();
+                }
+                else {
+                    request.continue();
+                }
+              });
                   
         }) 
     }

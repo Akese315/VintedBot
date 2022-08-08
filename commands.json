@@ -104,10 +104,23 @@
                 
                 ]
             },
-
+            "BRAND_COMMAND":    
+            {
+                "name" : "search-brand",
+                "description" : "Sauvegarde les marques des produit que vous souhaitez avoir.",
+                "options":[
+                    {
+                        "name":"brand",
+                        "description": "Sélectionner la marque",
+                        "type" : 3,
+                        "required" : true                  
+                    }
+                
+                ]
+            },
             "DATABASE_COMMAND":
             {
-                "name" : "Database",
+                "name" : "database",
                 "description" : "Sauvegarde la taille des produit que vous souhaitez avoir.",
                 "options":[
                     {
@@ -119,7 +132,7 @@
                             [
                                 {
                                     "name": "delete",
-                                    "value": "S"
+                                    "value": "supprimer"
                                 },
                                 {
                                     "name": "get-purchase",
@@ -131,4 +144,5 @@
                 
                 ]
             }
+
 }
