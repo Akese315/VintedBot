@@ -9,9 +9,11 @@ const commandsID =
     general_channel_id: process.env.GENERAL_CHANNEL_ID,
     product_channel_id: process.env.PRODUCT_CHANNEL_ID
 }
+
+
 var robot = new Robot(commandsID,commandsList,TOKEN,clientID);
 robot.__init__(()=>
-{
+{   
     robot.intervalID = setInterval(()=>
     {
         robot.getProducts();

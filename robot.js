@@ -37,7 +37,11 @@ class Robot
         this.commandsID = commandsID;    
         this.vintedObj = new Vinted_Class();
         this.db = new Database();
-        this.client = new Client({intents : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]}); 
+        this.client = new Client(
+            {
+            sweepers: {interval : 300},
+            intents : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+            }); 
         this.rest = new REST({ version: '10' }).setToken(this.botToken);
         this.commands.push(commandList.PRICE_COMMAND);
         this.commands.push(commandList.SIZE_COMMAND);
