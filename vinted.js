@@ -194,7 +194,7 @@ class Vinted_Class
         var FinalProductList = await this.page.evaluate(()=>
         {   
             var productList = [];
-            var imageList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_image']");
+            var imageList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_image-container__']");
             var priceList =  document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_title-content']");
             var brandList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_details']");
             var sizeList = document.querySelectorAll(".feed-grid__item:not(.feed-grid__item--full-row) [class*='ItemBox_subtitle']");
@@ -207,7 +207,7 @@ class Vinted_Class
                             brand: brandList[i].innerText,
                             url: imageList[i].lastChild.href,
                             size: sizeList[i].innerText,
-                            image: imageList[i].firstChild.firstChild.src,
+                            image: imageList[i].firstChild.firstChild.firstChild.src,
                             price: priceList[i].innerText,
                         }
                     );

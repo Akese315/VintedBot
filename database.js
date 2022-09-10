@@ -56,7 +56,7 @@ class Database
     }
 
     async urlExists(productUrl)
-    {
+    {   
         return this.ProductTable.findOne({where:{url:productUrl}});
     }
 

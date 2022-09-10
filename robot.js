@@ -198,6 +198,7 @@ class Robot
         var now = Date.now();
         var list = await this.vintedObj.getCatalogue();
         var delta = (Date.now() -now)/1000;
+        console.log(list);
         console.log("temps écoulé : " + delta + "s");
         await console.log("collecté : "+list.length)
         if(list.length === 0)
